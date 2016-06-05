@@ -4,7 +4,7 @@
 
 Android library listening available WiFi Access Points and change of the WiFi signal strength with RxJava Observables.
 
-It's functionality extracted from [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
+Its functionality was extracted from [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
 
 Library is compatible with RxJava 1.+ and RxAndroid 1.+ and uses them under the hood.
 
