@@ -33,6 +33,8 @@ Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context)
 
 ### Observing WiFi Access Points
 
+**Please note**: If you want to observe WiFi access points on Android M (6.0) or higher, you need to request runtime permission for `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION`. After that, location services have to be enabled. See sample app in `app` directory to check how it's done.
+
 We can observe WiFi Access Points with `observeWifiAccessPoints(context)` method. Subscriber will be called everytime, when strength of the WiFi Access Points signal changes (it usually happens when user is moving around with a mobile device). We can do it in the following way:
 
 ```java
