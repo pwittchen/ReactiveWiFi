@@ -33,3 +33,8 @@ captures/
 
 # IntelliJ files
 *.iml
+/.idea
+
+# others
+/.DS_Store
+
