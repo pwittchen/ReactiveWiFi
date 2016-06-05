@@ -8,6 +8,8 @@ Its functionality was extracted from [ReactiveNetwork](https://github.com/pwittc
 
 Library is compatible with RxJava 1.+ and RxAndroid 1.+ and uses them under the hood.
 
+JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/
+
 Contents
 --------
 
