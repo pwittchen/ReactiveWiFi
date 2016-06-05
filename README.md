@@ -1,4 +1,4 @@
-# ReactiveWiFi (WIP) [![Build Status](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=master)](https://travis-ci.org/pwittchen/ReactiveWiFi)
+# ReactiveWiFi [![Build Status](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=master)](https://travis-ci.org/pwittchen/ReactiveWiFi) ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat)
 
 Android library listening available WiFi Access Points and change of the WiFi signal strength with RxJava Observables.
 
