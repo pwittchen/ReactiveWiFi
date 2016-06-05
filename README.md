@@ -1,4 +1,4 @@
-# ReactiveWiFi (WIP)
+# ReactiveWiFi (WIP) [![Build Status](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=master)](https://travis-ci.org/pwittchen/ReactiveWiFi)
 
 **This project is not ready yet**.
 
