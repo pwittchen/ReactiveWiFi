@@ -4,7 +4,7 @@ Android library listening available WiFi Access Points and change of the WiFi si
 
 Its functionality was extracted from [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project to make it more specialized and reduce number of required permissions.
 
-If you are searching library for observing network or internet connectivity check [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
+If you are searching library for observing network or Internet connectivity check [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
 
 Library is compatible with RxJava 1.+ and RxAndroid 1.+ and uses them under the hood.
 
