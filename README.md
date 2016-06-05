@@ -106,7 +106,21 @@ If you want to use this library with Kotlin, check `app-kotlin` directory.
 Download
 --------
 
-TBD.
+```xml
+<dependency>
+    <groupId>com.github.pwittchen</groupId>
+    <artifactId>reactivewifi</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+or through Gradle:
+
+```groovy
+dependencies {
+  compile 'com.github.pwittchen:reactivewifi:0.0.1'
+}
+```
 
 Code style
 ----------
