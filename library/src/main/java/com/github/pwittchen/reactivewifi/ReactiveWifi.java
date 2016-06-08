@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
 import java.util.List;
@@ -123,6 +125,78 @@ public class ReactiveWifi {
         }));
       }
     }).defaultIfEmpty(0);
+  }
+
+  /**
+   * Observes the current WPA supplicant state.
+   * Returns the current WPA supplicant as a member of the {@link SupplicantState} enumeration,
+   * returning {@link SupplicantState#UNINITIALIZED} if Wifi is not enabled.
+   *
+   * @param context Context of the activity or an application
+   * @return RxJava Observable with SupplicantState
+   */
+  public Observable<SupplicantState> observeSupplicantState(final Context context) {
+    final IntentFilter filter = new IntentFilter();
+    filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+
+    return Observable.create(new Observable.OnSubscribe<SupplicantState>() {
+      @Override public void call(final Subscriber<? super SupplicantState> subscriber) {
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+          @Override public void onReceive(Context context, Intent intent) {
+            SupplicantState supplicantState =
+                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+
+            if (SupplicantState.isValidState(supplicantState)) {
+               subscriber.onNext(supplicantState);
+            }
+          }
+        };
+
+        context.registerReceiver(receiver, filter);
+
+        subscriber.add(unsubscribeInUiThread(new Action0() {
+          @Override public void call() {
+            context.unregisterReceiver(receiver);
+          }
+        }));
+      }
+    }).defaultIfEmpty(SupplicantState.UNINITIALIZED);
+  }
+
+  /**
+   * Observes the Wifi network the device is connected to.
+   * Returns the current Wifi network information as a {@link WifiInfo} object, or {@code null}
+   * if Wifi is not enabled.
+   *
+   * @param context Context of the activity or an application
+   * @return RxJava Observable with WifiInfo
+   */
+  public Observable<WifiInfo> observeWifiAccessPointChanges(final Context context) {
+    final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+    final IntentFilter filter = new IntentFilter();
+    filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+
+    return Observable.create(new Observable.OnSubscribe<WifiInfo>() {
+      @Override public void call(final Subscriber<? super WifiInfo> subscriber) {
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+          @Override public void onReceive(Context context, Intent intent) {
+            SupplicantState supplicantState =
+                    intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+            if (supplicantState == SupplicantState.COMPLETED) {
+              subscriber.onNext(wifiManager.getConnectionInfo());
+            }
+          }
+        };
+
+        context.registerReceiver(receiver, filter);
+
+        subscriber.add(unsubscribeInUiThread(new Action0() {
+          @Override public void call() {
+            context.unregisterReceiver(receiver);
+          }
+        }));
+      }
+    }).defaultIfEmpty(null);
   }
 
   private Subscription unsubscribeInUiThread(final Action0 unsubscribe) {

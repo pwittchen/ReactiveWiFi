@@ -34,6 +34,8 @@ class MainActivity : Activity() {
   private var reactiveWifi: ReactiveWifi? = null
   private var wifiSubscription: Subscription? = null
   private var signalLevelSubscription: Subscription? = null
+  private var supplicantSubscription: Subscription? = null
+  private var wifiInfoSubscription: Subscription? = null
 
   companion object {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
@@ -66,6 +68,9 @@ class MainActivity : Activity() {
     } else if (isCoarseLocationPermissionGranted || IS_PRE_M_ANDROID) {
       startWifiAccessPointsSubscription()
     }
+
+    startSupplicantSubscription()
+    startWifiInfoSubscription()
   }
 
   private fun startWifiAccessPointsSubscription() {
@@ -75,6 +80,26 @@ class MainActivity : Activity() {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { scanResults ->
           displayAccessPoints(scanResults)
+        }
+  }
+
+  private fun startSupplicantSubscription() {
+    supplicantSubscription = (reactiveWifi as ReactiveWifi)
+        .observeSupplicantState(applicationContext)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { supplicantState ->
+          Log.d("ReactiveWifi", "New supplicant state: " + supplicantState.toString())
+        }
+  }
+
+  private fun startWifiInfoSubscription() {
+    wifiInfoSubscription = (reactiveWifi as ReactiveWifi)
+        .observeWifiAccessPointChanges(applicationContext)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { wifiInfo ->
+          Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.bssid)
         }
   }
 
@@ -91,7 +116,8 @@ class MainActivity : Activity() {
 
   override fun onPause() {
     super.onPause()
-    safelyUnsubscribe(wifiSubscription, signalLevelSubscription)
+    safelyUnsubscribe(wifiSubscription, signalLevelSubscription, supplicantSubscription,
+        wifiInfoSubscription)
   }
 
   private fun safelyUnsubscribe(vararg subscriptions: Subscription?) {

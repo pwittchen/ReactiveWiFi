@@ -16,6 +16,8 @@ Contents
 - [Usage](#usage)
   - [Observing WiFi Access Points](#observing-wifi-access-points)
   - [Observing WiFi signal level](#observing-wifi-signal-level)
+  - [Observing WiFi information changes](#observing-wifi-information-changes)
+  - [Observing WPA Supplicant state changes](#observing-wpa-supplicant-state-changes)
 - [Examples](#examples)
 - [Download](#download)
 - [Code style](#code-style)
@@ -31,6 +33,8 @@ Library has the following RxJava Observables available in the public API:
 Observable<List<ScanResult>> observeWifiAccessPoints(final Context context)
 Observable<Integer> observeWifiSignalLevel(final Context context, final int numLevels)
 Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context)
+Observable<SupplicantState> observeSupplicantState(final Context context)
+Observable<WifiInfo> observeWifiAccessPointChanges(final Context context)
 ```
 
 ### Observing WiFi Access Points
@@ -94,6 +98,38 @@ public enum WifiSignalLevel {
   EXCELLENT(4, "excellent");
   ...
 }
+```
+
+### Observing WiFi information changes
+
+We can observe WiFi network information changes with `observeWifiAccessPointChanges(context)` method. Subscriber will be called every time the WiFi network the device is connected to has changed. We can do it in the following way:
+
+```java
+new ReactiveWifi().observeWifiAccessPointChanges(context)
+    .subscribeOn(Schedulers.io())
+    ... // anything else what you can do with RxJava
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Action1<WifiInfo>() {
+      @Override public void call(WifiInfo wifiInfo) {
+        // do something with wifiInfo
+      }
+    });
+```
+
+### Observing WPA Supplicant state changes
+
+We can observe changes in the WPA Supplicant state with `observeSupplicantState(context)` method. Subscriber will be called every time the WPA Supplicant will change its state, getting information at a lower level than usually available. We can do it in the following way:
+
+```java
+new ReactiveWifi().observeSupplicantState(context)
+    .subscribeOn(Schedulers.io())
+    ... // anything else what you can do with RxJava
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Action1<SupplicantState>() {
+      @Override public void call(SuppicantState state) {
+        // do something with state
+      }
+    });
 ```
 
 Examples
