@@ -165,8 +165,7 @@ public class ReactiveWifi {
 
   /**
    * Observes the Wifi network the device is connected to.
-   * Returns the current Wifi network information as a {@link WifiInfo} object, or {@code null}
-   * if Wifi is not enabled.
+   * Returns the current Wifi network information as a {@link WifiInfo} object.
    *
    * @param context Context of the activity or an application
    * @return RxJava Observable with WifiInfo
@@ -196,7 +195,7 @@ public class ReactiveWifi {
           }
         }));
       }
-    }).defaultIfEmpty(null);
+    });
   }
 
   private Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
