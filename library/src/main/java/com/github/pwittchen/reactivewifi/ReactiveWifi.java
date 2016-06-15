@@ -146,7 +146,7 @@ public class ReactiveWifi {
             SupplicantState supplicantState =
                 intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
-            if (SupplicantState.isValidState(supplicantState)) {
+            if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
                subscriber.onNext(supplicantState);
             }
           }
