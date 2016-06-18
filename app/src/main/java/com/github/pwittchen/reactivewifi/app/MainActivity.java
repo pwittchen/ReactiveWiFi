@@ -19,6 +19,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +45,8 @@ public class MainActivity extends Activity {
   private ReactiveWifi reactiveWifi;
   private Subscription wifiSubscription;
   private Subscription signalLevelSubscription;
+  private Subscription supplicantSubscription;
+  private Subscription wifiInfoSubscription;
   public static final boolean IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +77,9 @@ public class MainActivity extends Activity {
     } else if (isCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
       startWifiAccessPointsSubscription();
     }
+
+    startSupplicantSubscription();
+    startWifiInfoSubscription();
   }
 
   private void startWifiAccessPointsSubscription() {
@@ -82,6 +89,30 @@ public class MainActivity extends Activity {
         .subscribe(new Action1<List<ScanResult>>() {
           @Override public void call(final List<ScanResult> scanResults) {
             displayAccessPoints(scanResults);
+          }
+        });
+  }
+
+  private void startSupplicantSubscription() {
+    supplicantSubscription = reactiveWifi.observeSupplicantState(getApplicationContext())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<SupplicantState>() {
+          @Override
+          public void call(SupplicantState supplicantState) {
+            Log.d("ReactiveWifi", "New supplicant state: " + supplicantState.toString());
+          }
+        });
+  }
+
+  private void startWifiInfoSubscription() {
+    wifiInfoSubscription = reactiveWifi.observeWifiAccessPointChanges(getApplicationContext())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<WifiInfo>() {
+          @Override
+          public void call(WifiInfo wifiInfo) {
+            Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.getBSSID());
           }
         });
   }
@@ -99,7 +130,8 @@ public class MainActivity extends Activity {
 
   @Override protected void onPause() {
     super.onPause();
-    safelyUnsubscribe(wifiSubscription, signalLevelSubscription);
+    safelyUnsubscribe(wifiSubscription, signalLevelSubscription, supplicantSubscription,
+        wifiInfoSubscription);
   }
 
   private void safelyUnsubscribe(Subscription... subscriptions) {
