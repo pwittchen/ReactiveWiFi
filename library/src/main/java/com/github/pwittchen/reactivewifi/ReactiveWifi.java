@@ -130,7 +130,7 @@ public class ReactiveWifi {
   /**
    * Observes the current WPA supplicant state.
    * Returns the current WPA supplicant as a member of the {@link SupplicantState} enumeration,
-   * returning {@link SupplicantState#UNINITIALIZED} if Wifi is not enabled.
+   * returning {@link SupplicantState#UNINITIALIZED} if WiFi is not enabled.
    *
    * @param context Context of the activity or an application
    * @return RxJava Observable with SupplicantState
@@ -164,8 +164,8 @@ public class ReactiveWifi {
   }
 
   /**
-   * Observes the Wifi network the device is connected to.
-   * Returns the current Wifi network information as a {@link WifiInfo} object.
+   * Observes the WiFi network the device is connected to.
+   * Returns the current WiFi network information as a {@link WifiInfo} object.
    *
    * @param context Context of the activity or an application
    * @return RxJava Observable with WifiInfo
