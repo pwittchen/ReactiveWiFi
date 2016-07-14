@@ -1,4 +1,4 @@
-# ReactiveWiFi [![Build Status](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=master)](https://travis-ci.org/pwittchen/ReactiveWiFi) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ReactiveWiFi-brightgreen.svg?style=true)](https://android-arsenal.com/details/1/3913) ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat)
+# ReactiveWiFi [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-ReactiveWiFi-brightgreen.svg?style=true)](https://android-arsenal.com/details/1/3913) [![Build Status](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=master)](https://travis-ci.org/pwittchen/ReactiveWiFi)  ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat)
 
 Android library listening available WiFi Access Points and related information with RxJava Observables.
 
