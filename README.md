@@ -14,6 +14,7 @@ Contents
 --------
 
 - [Usage](#usage)
+  - [Observing WiFi Connection](#observing-wifi-access-points)
   - [Observing WiFi Access Points](#observing-wifi-access-points)
   - [Observing WiFi signal level](#observing-wifi-signal-level)
   - [Observing WiFi information changes](#observing-wifi-information-changes)
@@ -30,13 +31,28 @@ Usage
 Library has the following RxJava Observables available in the public API:
 
 ```java
+Observable<Boolean> observeWifiConnection(final Context context)
 Observable<List<ScanResult>> observeWifiAccessPoints(final Context context)
 Observable<Integer> observeWifiSignalLevel(final Context context, final int numLevels)
 Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context)
 Observable<SupplicantState> observeSupplicantState(final Context context)
 Observable<WifiInfo> observeWifiAccessPointChanges(final Context context)
 ```
-
+### Observing WiFi Connection
+We can observe WiFi connection with `observeWifiConnection(context)` method.
+Subscriber will be called everytime, when WiFi connection On or Off.
+We can do it as follows:
+```java
+new ReactiveWifi().observeWifiConnection(context)
+    .subscribeOn(Schedulers.io())
+    ... // anything else what you can do with RxJava
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Action1<Boolean>() {
+      @Override public void call(Boolean boolean) {
+        // do something with signalLevel
+      }
+    });
+```
 ### Observing WiFi Access Points
 
 **Please note**: If you want to observe WiFi access points on Android M (6.0) or higher, you need to [request runtime permission](https://developer.android.com/training/permissions/requesting.html) for `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION`. After that, location services have to be enabled. See sample app in `app` directory to check how it's done.
