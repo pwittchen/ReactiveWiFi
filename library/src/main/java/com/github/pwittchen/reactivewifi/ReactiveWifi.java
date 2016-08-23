@@ -42,13 +42,13 @@ import rx.subscriptions.Subscriptions;
 public class ReactiveWifi {
 
   /**
-   * Observe WiFi connection for enable and disable
+   * Observes WiFi connection
    *
    * @param context Context of the activity or an application
    * @return RxJava Observable with Boolean true means WiFi is On else false.
    */
 
-  public Observable<Boolean> observeWifiConnections(final Context context) {
+  public Observable<Boolean> observeWifiConnection(final Context context) {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
 

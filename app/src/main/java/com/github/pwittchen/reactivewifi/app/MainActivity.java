@@ -60,10 +60,10 @@ public class MainActivity extends Activity {
     lvAccessPoints = (ListView) findViewById(R.id.access_points);
     tvWifiSignalLevel = (TextView) findViewById(R.id.wifi_signal_level);
     tvWiFiConnection = (TextView) findViewById(R.id.wifi_connection_result);
-    showDefault();
+    displayDefaultWifiConnectionState();
   }
 
-  private void showDefault() {
+  private void displayDefaultWifiConnectionState() {
     WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
     displayWifiConnection(wifi.isWifiEnabled());
   }
@@ -89,13 +89,13 @@ public class MainActivity extends Activity {
     } else if (isCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
       startWifiAccessPointsSubscription();
     }
-    startWifiConnectionsSubscription();
+    startWifiConnectionSubscription();
     startSupplicantSubscription();
     startWifiInfoSubscription();
   }
 
-  private void startWifiConnectionsSubscription() {
-    wifiConnectionSubscription = reactiveWifi.observeWifiConnections(getApplicationContext())
+  private void startWifiConnectionSubscription() {
+    wifiConnectionSubscription = reactiveWifi.observeWifiConnection(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<Boolean>() {
