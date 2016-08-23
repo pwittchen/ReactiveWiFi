@@ -45,7 +45,7 @@ public class ReactiveWifi {
    * Observe WiFi connection for enable and disable
    *
    * @param context Context of the activity or an application
-   * @return RxJava Observable with list of WiFi scan results
+   * @return RxJava Observable with Boolean true means WiFi is On else false.
    */
 
   public Observable<Boolean> observeWifiConnections(final Context context) {
