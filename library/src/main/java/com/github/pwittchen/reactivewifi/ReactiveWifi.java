@@ -42,6 +42,40 @@ import rx.subscriptions.Subscriptions;
 public class ReactiveWifi {
 
   /**
+   * Observe WiFi connection for enable and disable
+   *
+   * @param context Context of the activity or an application
+   * @return RxJava Observable with list of WiFi scan results
+   */
+
+  public Observable<Boolean> observeWifiConnections(final Context context) {
+    final IntentFilter filter = new IntentFilter();
+    filter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+
+    return Observable.create(new Observable.OnSubscribe<Boolean>() {
+      @Override public void call(final Subscriber<? super Boolean> subscriber) {
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+          @Override public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION)) {
+              subscriber.onNext(
+                  intent.getBooleanExtra(WifiManager.EXTRA_SUPPLICANT_CONNECTED, false));
+            }
+          }
+        };
+
+        context.registerReceiver(receiver, filter);
+
+        subscriber.add(unsubscribeInUiThread(new Action0() {
+          @Override public void call() {
+            context.unregisterReceiver(receiver);
+          }
+        }));
+      }
+    });
+  }
+
+  /**
    * Observes WiFi Access Points.
    * Returns fresh list of Access Points
    * whenever WiFi signal strength changes.
@@ -147,7 +181,7 @@ public class ReactiveWifi {
                 intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
             if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
-               subscriber.onNext(supplicantState);
+              subscriber.onNext(supplicantState);
             }
           }
         };
@@ -180,7 +214,7 @@ public class ReactiveWifi {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
-                    intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
             if (supplicantState == SupplicantState.COMPLETED) {
               subscriber.onNext(wifiManager.getConnectionInfo());
             }
