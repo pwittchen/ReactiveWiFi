@@ -17,10 +17,12 @@ package com.github.pwittchen.reactivewifi.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,6 +60,12 @@ public class MainActivity extends Activity {
     lvAccessPoints = (ListView) findViewById(R.id.access_points);
     tvWifiSignalLevel = (TextView) findViewById(R.id.wifi_signal_level);
     tvWiFiConnection = (TextView) findViewById(R.id.wifi_connection_result);
+    showDefault();
+  }
+
+  private void showDefault() {
+    WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+    displayWifiConnection(wifi.isWifiEnabled());
   }
 
   @Override protected void onResume() {
@@ -92,12 +100,12 @@ public class MainActivity extends Activity {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<Boolean>() {
           @Override public void call(Boolean aBoolean) {
-            displayConnections(aBoolean);
+            displayWifiConnection(aBoolean);
           }
         });
   }
 
-  private void displayConnections(Boolean status) {
+  private void displayWifiConnection(Boolean status) {
     tvWiFiConnection.setText(status ? R.string.wifi_on : R.string.wifi_off);
   }
 
