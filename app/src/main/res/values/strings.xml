@@ -3,4 +3,7 @@
   <string name="waiting_for_wifi_signal_level">Waiting for WiFi signal level&#8230;</string>
   <string name="wifi_signal_level">WiFi signal level:</string>
   <string name="available_access_points">Available Access Points:</string>
+  <string name="wifi">WiFi</string>
+  <string name="wifi_on">WiFi is On</string>
+  <string name="wifi_off">WiFi is Off</string>
 </resources>
