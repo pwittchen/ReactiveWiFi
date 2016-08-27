@@ -14,7 +14,7 @@ Contents
 --------
 
 - [Usage](#usage)
-  - [Observing WiFi Connection](#observing-wifi-access-points)
+  - [Observing WiFi Connection](#observing-wifi-connection)
   - [Observing WiFi Access Points](#observing-wifi-access-points)
   - [Observing WiFi signal level](#observing-wifi-signal-level)
   - [Observing WiFi information changes](#observing-wifi-information-changes)
@@ -40,7 +40,8 @@ Observable<WifiInfo> observeWifiAccessPointChanges(final Context context)
 ```
 ### Observing WiFi Connection
 We can observe WiFi connection with `observeWifiConnection(context)` method.
-Subscriber will be called everytime, when WiFi connection On or Off.
+Subscriber will be called every time, when device is connected to WiFi or disconnected from WiFi.
+
 We can do it as follows:
 ```java
 new ReactiveWifi().observeWifiConnection(context)
