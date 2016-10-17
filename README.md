@@ -37,6 +37,10 @@ Observable<SupplicantState> observeSupplicantState(final Context context)
 Observable<WifiInfo> observeWifiAccessPointChanges(final Context context)
 ```
 
+**Please note**: Due to memory leak in `WifiManager` reported
+in [issue 43945](https://code.google.com/p/android/issues/detail?id=43945) in Android issue tracker
+it's recommended to use Application Context instead of Activity Context.
+
 ### Observing WiFi Access Points
 
 **Please note**: If you want to observe WiFi access points on Android M (6.0) or higher, you need to [request runtime permission](https://developer.android.com/training/permissions/requesting.html) for `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION`. After that, location services have to be enabled. See sample app in `app` directory to check how it's done.
