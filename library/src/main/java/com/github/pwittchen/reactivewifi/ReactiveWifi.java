@@ -58,9 +58,11 @@ public class ReactiveWifi {
     filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 
     return Observable.create(new Observable.OnSubscribe<List<ScanResult>>() {
-      @Override public void call(final Subscriber<? super List<ScanResult>> subscriber) {
+      @Override
+      public void call(final Subscriber<? super List<ScanResult>> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
+          @Override
+          public void onReceive(Context context, Intent intent) {
             wifiManager.startScan(); // we need to start scan again to get fresh results ASAP
             subscriber.onNext(wifiManager.getScanResults());
           }
@@ -69,7 +71,8 @@ public class ReactiveWifi {
         context.registerReceiver(receiver, filter);
 
         subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+          @Override
+          public void call() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -87,7 +90,8 @@ public class ReactiveWifi {
   public Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
     return observeWifiSignalLevel(context, WifiSignalLevel.getMaxLevel()).map(
         new Func1<Integer, WifiSignalLevel>() {
-          @Override public WifiSignalLevel call(Integer level) {
+          @Override
+          public WifiSignalLevel call(Integer level) {
             return WifiSignalLevel.fromLevel(level);
           }
         });
@@ -107,9 +111,11 @@ public class ReactiveWifi {
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
     return Observable.create(new Observable.OnSubscribe<Integer>() {
-      @Override public void call(final Subscriber<? super Integer> subscriber) {
+      @Override
+      public void call(final Subscriber<? super Integer> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
+          @Override
+          public void onReceive(Context context, Intent intent) {
             final int rssi = wifiManager.getConnectionInfo().getRssi();
             final int level = WifiManager.calculateSignalLevel(rssi, numLevels);
             subscriber.onNext(level);
@@ -119,7 +125,8 @@ public class ReactiveWifi {
         context.registerReceiver(receiver, filter);
 
         subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+          @Override
+          public void call() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -140,14 +147,16 @@ public class ReactiveWifi {
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
     return Observable.create(new Observable.OnSubscribe<SupplicantState>() {
-      @Override public void call(final Subscriber<? super SupplicantState> subscriber) {
+      @Override
+      public void call(final Subscriber<? super SupplicantState> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
+          @Override
+          public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
                 intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
             if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
-               subscriber.onNext(supplicantState);
+              subscriber.onNext(supplicantState);
             }
           }
         };
@@ -155,7 +164,8 @@ public class ReactiveWifi {
         context.registerReceiver(receiver, filter);
 
         subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+          @Override
+          public void call() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -176,11 +186,13 @@ public class ReactiveWifi {
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
     return Observable.create(new Observable.OnSubscribe<WifiInfo>() {
-      @Override public void call(final Subscriber<? super WifiInfo> subscriber) {
+      @Override
+      public void call(final Subscriber<? super WifiInfo> subscriber) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
+          @Override
+          public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
-                    intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
             if (supplicantState == SupplicantState.COMPLETED) {
               subscriber.onNext(wifiManager.getConnectionInfo());
             }
@@ -190,7 +202,43 @@ public class ReactiveWifi {
         context.registerReceiver(receiver, filter);
 
         subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
+          @Override
+          public void call() {
+            context.unregisterReceiver(receiver);
+          }
+        }));
+      }
+    });
+  }
+
+  /**
+   * Observes WiFi State Change Action
+   * Returns wifi state
+   * whenever WiFi state changes such like enable,disable,enabling,disabling or Unknown
+   *
+   * @param context Context of the activity or an application
+   * @return RxJava Observable with different state change
+   */
+  public Observable<WifiState> observeWifiStateChange(final Context context) {
+    final IntentFilter filter = new IntentFilter();
+    filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+    return Observable.create(new Observable.OnSubscribe<WifiState>() {
+      @Override
+      public void call(final Subscriber<? super WifiState> subscriber) {
+
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+          @Override
+          public void onReceive(Context context, Intent intent) {
+            //we receive whenever the wifi state is change
+            int wifiState =
+                intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+            subscriber.onNext(WifiState.fromState(wifiState));
+          }
+        };
+        context.registerReceiver(receiver, filter);
+        subscriber.add(unsubscribeInUiThread(new Action0() {
+          @Override
+          public void call() {
             context.unregisterReceiver(receiver);
           }
         }));
@@ -200,13 +248,15 @@ public class ReactiveWifi {
 
   private Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
     return Subscriptions.create(new Action0() {
-      @Override public void call() {
+      @Override
+      public void call() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
           unsubscribe.call();
         } else {
           final Scheduler.Worker inner = AndroidSchedulers.mainThread().createWorker();
           inner.schedule(new Action0() {
-            @Override public void call() {
+            @Override
+            public void call() {
               unsubscribe.call();
               inner.unsubscribe();
             }

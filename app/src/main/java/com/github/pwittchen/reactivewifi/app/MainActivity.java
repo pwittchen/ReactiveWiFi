@@ -29,6 +29,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
+import com.github.pwittchen.reactivewifi.WifiState;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Subscription;
@@ -40,23 +41,29 @@ public class MainActivity extends Activity {
   private static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000;
   private static final String TAG = "ReactiveWifi";
   private static final String WIFI_SIGNAL_LEVEL_MESSAGE = "WiFi signal level: ";
+  private static final String WIFI_STATE_MESSAGE = "WiFi State: ";
   private TextView tvWifiSignalLevel;
+  private TextView tvWifiStateLevel;
   private ListView lvAccessPoints;
   private ReactiveWifi reactiveWifi;
   private Subscription wifiSubscription;
   private Subscription signalLevelSubscription;
   private Subscription supplicantSubscription;
+  private Subscription wifiStateSubscription;
   private Subscription wifiInfoSubscription;
   public static final boolean IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     lvAccessPoints = (ListView) findViewById(R.id.access_points);
     tvWifiSignalLevel = (TextView) findViewById(R.id.wifi_signal_level);
+    tvWifiStateLevel = (TextView) findViewById(R.id.wifi_state_change);
   }
 
-  @Override protected void onResume() {
+  @Override
+  protected void onResume() {
     super.onResume();
 
     reactiveWifi = new ReactiveWifi();
@@ -65,7 +72,8 @@ public class MainActivity extends Activity {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<WifiSignalLevel>() {
-          @Override public void call(final WifiSignalLevel level) {
+          @Override
+          public void call(final WifiSignalLevel level) {
             Log.d(TAG, level.toString());
             final String description = level.description;
             tvWifiSignalLevel.setText(WIFI_SIGNAL_LEVEL_MESSAGE.concat(description));
@@ -80,6 +88,7 @@ public class MainActivity extends Activity {
 
     startSupplicantSubscription();
     startWifiInfoSubscription();
+    startWifiStateSubscription();
   }
 
   private void startWifiAccessPointsSubscription() {
@@ -87,7 +96,8 @@ public class MainActivity extends Activity {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<List<ScanResult>>() {
-          @Override public void call(final List<ScanResult> scanResults) {
+          @Override
+          public void call(final List<ScanResult> scanResults) {
             displayAccessPoints(scanResults);
           }
         });
@@ -117,6 +127,19 @@ public class MainActivity extends Activity {
         });
   }
 
+  private void startWifiStateSubscription() {
+    wifiStateSubscription = reactiveWifi.observeWifiStateChange(getApplicationContext())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<WifiState>() {
+          @Override
+          public void call(WifiState wifiState) {
+            Log.d(TAG, "call: " + wifiState.name());
+            tvWifiStateLevel.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
+          }
+        });
+  }
+
   private void displayAccessPoints(List<ScanResult> scanResults) {
     final List<String> ssids = new ArrayList<>();
 
@@ -128,10 +151,11 @@ public class MainActivity extends Activity {
     lvAccessPoints.setAdapter(new ArrayAdapter<>(this, itemLayoutId, ssids));
   }
 
-  @Override protected void onPause() {
+  @Override
+  protected void onPause() {
     super.onPause();
     safelyUnsubscribe(wifiSubscription, signalLevelSubscription, supplicantSubscription,
-        wifiInfoSubscription);
+        wifiInfoSubscription, wifiStateSubscription);
   }
 
   private void safelyUnsubscribe(Subscription... subscriptions) {
@@ -142,7 +166,8 @@ public class MainActivity extends Activity {
     }
   }
 
-  @Override public void onRequestPermissionsResult(int requestCode, String[] permissions,
+  @Override
+  public void onRequestPermissionsResult(int requestCode, String[] permissions,
       int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     final boolean isCoarseLocation = requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION;
