@@ -40,8 +40,7 @@ public enum WifiState {
     }
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return "WifiState{" +
         "state=" + state +
         ", description='" + description + '\'' +

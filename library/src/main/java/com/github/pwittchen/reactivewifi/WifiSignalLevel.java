@@ -36,6 +36,7 @@ public enum WifiSignalLevel {
 
   /**
    * Gets WifiSignalLevel enum basing on integer value
+   *
    * @param level as an integer
    * @return WifiSignalLevel enum
    */
