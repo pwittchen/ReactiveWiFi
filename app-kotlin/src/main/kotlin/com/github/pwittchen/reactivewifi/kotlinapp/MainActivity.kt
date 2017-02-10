@@ -36,11 +36,13 @@ class MainActivity : Activity() {
   private var signalLevelSubscription: Subscription? = null
   private var supplicantSubscription: Subscription? = null
   private var wifiInfoSubscription: Subscription? = null
+  private var wifiStateSubscription: Subscription? = null
 
   companion object {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
     private val TAG = "ReactiveWifi"
     private val WIFI_SIGNAL_LEVEL_MESSAGE = "WiFi signal level: "
+    private val WIFI_STATE_CHNAGE_MESSAGE = "WiFi State: "
     val IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M
   }
 
@@ -71,6 +73,7 @@ class MainActivity : Activity() {
 
     startSupplicantSubscription()
     startWifiInfoSubscription()
+    startWifiStateSubscription()
   }
 
   private fun startWifiAccessPointsSubscription() {
@@ -100,6 +103,17 @@ class MainActivity : Activity() {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { wifiInfo ->
           Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.bssid)
+        }
+  }
+
+  private fun startWifiStateSubscription() {
+    wifiStateSubscription = (reactiveWifi as ReactiveWifi)
+        .observeWifiStateChange(applicationContext)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { wifiState ->
+          Log.d("ReactiveWifi", wifiState.description)
+          wifi_state_change.text = WIFI_STATE_CHNAGE_MESSAGE + wifiState.description
         }
   }
 

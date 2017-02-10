@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 apply from: '../config/quality.gradle'
 
 android {
@@ -23,15 +22,11 @@ android {
     exclude 'LICENSE.txt'
     exclude 'META-INF/LICENSE.txt'
   }
-  sourceSets {
-    main.java.srcDirs += 'src/main/kotlin'
-  }
 }
 
 dependencies {
   compile 'io.reactivex:rxjava:1.1.8'
   compile 'io.reactivex:rxandroid:1.2.1'
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 task wrapper(type: Wrapper) {
@@ -39,6 +34,3 @@ task wrapper(type: Wrapper) {
 }
 
 apply from: '../maven_push.gradle'
-repositories {
-  mavenCentral()
-}

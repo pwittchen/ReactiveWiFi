@@ -1,15 +1,13 @@
 package com.github.pwittchen.reactivewifi;
 
-/**
- * Created by bhavdip on 2/9/17.
- */
+import android.net.wifi.WifiManager;
 
 public enum WifiState {
-  WIFI_STATE_DISABLING(0, "disabling"),
-  WIFI_STATE_DISABLED(1, "disabled"),
-  WIFI_STATE_ENABLING(2, "enabling"),
-  WIFI_STATE_ENABLED(3, "enabled"),
-  WIFI_STATE_UNKNOWN(4, "unknown");
+  DISABLING(WifiManager.WIFI_STATE_DISABLING, "disabling"),
+  DISABLED(WifiManager.WIFI_STATE_DISABLED, "disabled"),
+  ENABLING(WifiManager.WIFI_STATE_ENABLING, "enabling"),
+  ENABLED(WifiManager.WIFI_STATE_ENABLED, "enabled"),
+  STATE_UNKNOWN(WifiManager.WIFI_STATE_UNKNOWN, "unknown");
 
   public final int state;
   public final String description;
@@ -27,18 +25,18 @@ public enum WifiState {
    */
   public static WifiState fromState(final int state) {
     switch (state) {
-      case 0:
-        return WIFI_STATE_DISABLING;
-      case 1:
-        return WIFI_STATE_DISABLED;
-      case 2:
-        return WIFI_STATE_ENABLING;
-      case 3:
-        return WIFI_STATE_ENABLED;
-      case 4:
-        return WIFI_STATE_UNKNOWN;
+      case WifiManager.WIFI_STATE_DISABLING:
+        return DISABLING;
+      case WifiManager.WIFI_STATE_DISABLED:
+        return DISABLED;
+      case WifiManager.WIFI_STATE_ENABLING:
+        return ENABLING;
+      case WifiManager.WIFI_STATE_ENABLED:
+        return ENABLED;
+      case WifiManager.WIFI_STATE_UNKNOWN:
+        return STATE_UNKNOWN;
       default:
-        return WIFI_STATE_UNKNOWN;
+        return STATE_UNKNOWN;
     }
   }
 
