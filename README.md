@@ -45,7 +45,15 @@ it's recommended to use Application Context instead of Activity Context.
 
 ### Observing WiFi Access Points
 
-**Please note**: If you want to observe WiFi access points on Android M (6.0) or higher, you need to [request runtime permission](https://developer.android.com/training/permissions/requesting.html) for `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION`. After that, location services have to be enabled. See sample app in `app` directory to check how it's done.
+**Please note**: If you want to observe WiFi access points on Android M (6.0) or higher, you need to [request runtime permission](https://developer.android.com/training/permissions/requesting.html) for `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION`. After that, location services have to be enabled. See sample app in `app` directory to check how it's done. User needs to enable Location manually. You can suggest him or her to do it via `AccessRequester` class from this library as follows:
+
+```java
+if (!AccessRequester.isLocationEnabled(this)) {
+  AccessRequester.requestLocationAccess(this);
+} else {
+  // observe WiFi Access Points
+}
+```
 
 We can observe WiFi Access Points with `observeWifiAccessPoints(context)` method. Subscriber will be called everytime, when strength of the WiFi Access Points signal changes (it usually happens when user is moving around with a mobile device). We can do it in the following way:
 
