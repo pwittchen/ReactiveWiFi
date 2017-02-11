@@ -50,7 +50,7 @@ it's recommended to use Application Context instead of Activity Context.
 We can observe WiFi Access Points with `observeWifiAccessPoints(context)` method. Subscriber will be called everytime, when strength of the WiFi Access Points signal changes (it usually happens when user is moving around with a mobile device). We can do it in the following way:
 
 ```java
-new ReactiveWifi().observeWifiAccessPoints(context)
+ReactiveWifi.observeWifiAccessPoints(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
@@ -68,7 +68,7 @@ new ReactiveWifi().observeWifiAccessPoints(context)
 We can observe WiFi signal level with `observeWifiSignalLevel(context, numLevels)` method. Subscriber will be called everytime, when signal level of the connected WiFi  changes (it usually happens when user is moving around with a mobile device). We can do it in the following way:
 
 ```java
-new ReactiveWifi().observeWifiSignalLevel(context, numLevels)
+ReactiveWifi.observeWifiSignalLevel(context, numLevels)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
@@ -82,7 +82,7 @@ new ReactiveWifi().observeWifiSignalLevel(context, numLevels)
 We can also observe WiFi signal level with `observeWifiSignalLevel(final Context context)` method, which has predefined num levels value, which is equal to 4 and returns `Observable<WifiSignalLevel>`. `WifiSignalLevel` is an enum, which contains information about current signal level. We can do it as follows:
 
 ```java
-new ReactiveWifi().observeWifiSignalLevel(context)
+ReactiveWifi.observeWifiSignalLevel(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
@@ -111,7 +111,7 @@ public enum WifiSignalLevel {
 We can observe WiFi network information changes with `observeWifiAccessPointChanges(context)` method. Subscriber will be called every time the WiFi network the device is connected to has changed. We can do it in the following way:
 
 ```java
-new ReactiveWifi().observeWifiAccessPointChanges(context)
+ReactiveWifi.observeWifiAccessPointChanges(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
@@ -127,7 +127,7 @@ new ReactiveWifi().observeWifiAccessPointChanges(context)
 We can observe changes in the WPA Supplicant state with `observeSupplicantState(context)` method. Subscriber will be called every time the WPA Supplicant will change its state, getting information at a lower level than usually available. We can do it in the following way:
 
 ```java
-new ReactiveWifi().observeSupplicantState(context)
+ReactiveWifi.observeSupplicantState(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
@@ -143,7 +143,7 @@ new ReactiveWifi().observeSupplicantState(context)
 We can observe wifi state change with `observeWifiStateChange(context)` method. Subscriber will be called every time whenever the wifi state change such like enabling,disabling,enabled and disabled. We can do it in the following way:
 
 ```java
-new ReactiveWifi().observeWifiStateChange(context)
+ReactiveWifi.observeWifiStateChange(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())

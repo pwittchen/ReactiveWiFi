@@ -46,7 +46,6 @@ public class MainActivity extends Activity {
   private TextView tvWifiSignalLevel;
   private TextView tvWifiState;
   private ListView lvAccessPoints;
-  private ReactiveWifi reactiveWifi;
   private Subscription wifiSubscription;
   private Subscription signalLevelSubscription;
   private Subscription supplicantSubscription;
@@ -64,9 +63,20 @@ public class MainActivity extends Activity {
   @Override protected void onResume() {
     super.onResume();
 
-    reactiveWifi = new ReactiveWifi();
+    if (!isCoarseLocationPermissionGranted()) {
+      requestCoarseLocationPermission();
+    } else if (isCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
+      startWifiAccessPointsSubscription();
+    }
 
-    signalLevelSubscription = reactiveWifi.observeWifiSignalLevel(getApplicationContext())
+    startWifiSignalLevelSubscription();
+    startSupplicantSubscription();
+    startWifiInfoSubscription();
+    startWifiStateSubscription();
+  }
+
+  private void startWifiSignalLevelSubscription() {
+    signalLevelSubscription = ReactiveWifi.observeWifiSignalLevel(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<WifiSignalLevel>() {
@@ -76,20 +86,10 @@ public class MainActivity extends Activity {
             tvWifiSignalLevel.setText(WIFI_SIGNAL_LEVEL_MESSAGE.concat(description));
           }
         });
-
-    if (!isCoarseLocationPermissionGranted()) {
-      requestCoarseLocationPermission();
-    } else if (isCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
-      startWifiAccessPointsSubscription();
-    }
-
-    startSupplicantSubscription();
-    startWifiInfoSubscription();
-    startWifiStateSubscription();
   }
 
   private void startWifiAccessPointsSubscription() {
-    wifiSubscription = reactiveWifi.observeWifiAccessPoints(getApplicationContext())
+    wifiSubscription = ReactiveWifi.observeWifiAccessPoints(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<List<ScanResult>>() {
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
   }
 
   private void startSupplicantSubscription() {
-    supplicantSubscription = reactiveWifi.observeSupplicantState(getApplicationContext())
+    supplicantSubscription = ReactiveWifi.observeSupplicantState(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<SupplicantState>() {
@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
   }
 
   private void startWifiInfoSubscription() {
-    wifiInfoSubscription = reactiveWifi.observeWifiAccessPointChanges(getApplicationContext())
+    wifiInfoSubscription = ReactiveWifi.observeWifiAccessPointChanges(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<WifiInfo>() {
@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
   }
 
   private void startWifiStateSubscription() {
-    wifiStateSubscription = reactiveWifi.observeWifiStateChange(getApplicationContext())
+    wifiStateSubscription = ReactiveWifi.observeWifiStateChange(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<WifiState>() {
