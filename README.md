@@ -18,7 +18,7 @@ Contents
   - [Observing WiFi signal level](#observing-wifi-signal-level)
   - [Observing WiFi information changes](#observing-wifi-information-changes)
   - [Observing WPA Supplicant state changes](#observing-wpa-supplicant-state-changes)
-  - [Observing WiFi State changes](#Observing WiFi state changes)
+  - [Observing WiFi State changes](#observing-wifi-state-changes)
 - [Examples](#examples)
 - [Download](#download)
 - [Code style](#code-style)
