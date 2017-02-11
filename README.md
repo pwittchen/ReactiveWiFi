@@ -18,6 +18,7 @@ Contents
   - [Observing WiFi signal level](#observing-wifi-signal-level)
   - [Observing WiFi information changes](#observing-wifi-information-changes)
   - [Observing WPA Supplicant state changes](#observing-wpa-supplicant-state-changes)
+  - [Observing WiFi State changes](#Observing WiFi state changes)
 - [Examples](#examples)
 - [Download](#download)
 - [Code style](#code-style)
@@ -35,6 +36,7 @@ Observable<Integer> observeWifiSignalLevel(final Context context, final int numL
 Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context)
 Observable<SupplicantState> observeSupplicantState(final Context context)
 Observable<WifiInfo> observeWifiAccessPointChanges(final Context context)
+Observable<WifiState> observeWifiStateChange(final Context context)
 ```
 
 **Please note**: Due to memory leak in `WifiManager` reported
@@ -136,6 +138,21 @@ new ReactiveWifi().observeSupplicantState(context)
     });
 ```
 
+### Observing WiFi state changes
+
+We can observe wifi state change with `observeWifiStateChange(context)` method. Subscriber will be called every time whenever the wifi state change such like enabling,disabling,enabled and disabled. We can do it in the following way:
+
+```java
+new ReactiveWifi().observeWifiStateChange(context)
+    .subscribeOn(Schedulers.io())
+    ... // anything else what you can do with RxJava
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Action1<WifiState>() {
+      @Override public void call(WifiState wifiState) {
+        // do something with state
+      }
+    });
+```
 Examples
 --------
 

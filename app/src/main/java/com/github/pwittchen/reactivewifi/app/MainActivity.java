@@ -29,6 +29,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
+import com.github.pwittchen.reactivewifi.WifiState;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Subscription;
@@ -37,23 +38,27 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends Activity {
+  public static final boolean IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
   private static final int PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000;
   private static final String TAG = "ReactiveWifi";
   private static final String WIFI_SIGNAL_LEVEL_MESSAGE = "WiFi signal level: ";
+  private static final String WIFI_STATE_MESSAGE = "WiFi State: ";
   private TextView tvWifiSignalLevel;
+  private TextView tvWifiState;
   private ListView lvAccessPoints;
   private ReactiveWifi reactiveWifi;
   private Subscription wifiSubscription;
   private Subscription signalLevelSubscription;
   private Subscription supplicantSubscription;
+  private Subscription wifiStateSubscription;
   private Subscription wifiInfoSubscription;
-  public static final boolean IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     lvAccessPoints = (ListView) findViewById(R.id.access_points);
     tvWifiSignalLevel = (TextView) findViewById(R.id.wifi_signal_level);
+    tvWifiState = (TextView) findViewById(R.id.wifi_state_change);
   }
 
   @Override protected void onResume() {
@@ -80,6 +85,7 @@ public class MainActivity extends Activity {
 
     startSupplicantSubscription();
     startWifiInfoSubscription();
+    startWifiStateSubscription();
   }
 
   private void startWifiAccessPointsSubscription() {
@@ -98,8 +104,7 @@ public class MainActivity extends Activity {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<SupplicantState>() {
-          @Override
-          public void call(SupplicantState supplicantState) {
+          @Override public void call(SupplicantState supplicantState) {
             Log.d("ReactiveWifi", "New supplicant state: " + supplicantState.toString());
           }
         });
@@ -110,9 +115,20 @@ public class MainActivity extends Activity {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(new Action1<WifiInfo>() {
-          @Override
-          public void call(WifiInfo wifiInfo) {
+          @Override public void call(WifiInfo wifiInfo) {
             Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.getBSSID());
+          }
+        });
+  }
+
+  private void startWifiStateSubscription() {
+    wifiStateSubscription = reactiveWifi.observeWifiStateChange(getApplicationContext())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Action1<WifiState>() {
+          @Override public void call(WifiState wifiState) {
+            Log.d(TAG, "call: " + wifiState.name());
+            tvWifiState.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
           }
         });
   }
@@ -131,7 +147,7 @@ public class MainActivity extends Activity {
   @Override protected void onPause() {
     super.onPause();
     safelyUnsubscribe(wifiSubscription, signalLevelSubscription, supplicantSubscription,
-        wifiInfoSubscription);
+        wifiInfoSubscription, wifiStateSubscription);
   }
 
   private void safelyUnsubscribe(Subscription... subscriptions) {

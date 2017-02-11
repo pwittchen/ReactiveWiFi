@@ -147,7 +147,7 @@ public class ReactiveWifi {
                 intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
             if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
-               subscriber.onNext(supplicantState);
+              subscriber.onNext(supplicantState);
             }
           }
         };
@@ -180,7 +180,7 @@ public class ReactiveWifi {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
           @Override public void onReceive(Context context, Intent intent) {
             SupplicantState supplicantState =
-                    intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
             if (supplicantState == SupplicantState.COMPLETED) {
               subscriber.onNext(wifiManager.getConnectionInfo());
             }
@@ -189,6 +189,38 @@ public class ReactiveWifi {
 
         context.registerReceiver(receiver, filter);
 
+        subscriber.add(unsubscribeInUiThread(new Action0() {
+          @Override public void call() {
+            context.unregisterReceiver(receiver);
+          }
+        }));
+      }
+    });
+  }
+
+  /**
+   * Observes WiFi State Change Action
+   * Returns wifi state
+   * whenever WiFi state changes such like enable,disable,enabling,disabling or Unknown
+   *
+   * @param context Context of the activity or an application
+   * @return RxJava Observable with different state change
+   */
+  public Observable<WifiState> observeWifiStateChange(final Context context) {
+    final IntentFilter filter = new IntentFilter();
+    filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+    return Observable.create(new Observable.OnSubscribe<WifiState>() {
+      @Override public void call(final Subscriber<? super WifiState> subscriber) {
+
+        final BroadcastReceiver receiver = new BroadcastReceiver() {
+          @Override public void onReceive(Context context, Intent intent) {
+            //we receive whenever the wifi state is change
+            int wifiState =
+                intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+            subscriber.onNext(WifiState.fromState(wifiState));
+          }
+        };
+        context.registerReceiver(receiver, filter);
         subscriber.add(unsubscribeInUiThread(new Action0() {
           @Override public void call() {
             context.unregisterReceiver(receiver);
