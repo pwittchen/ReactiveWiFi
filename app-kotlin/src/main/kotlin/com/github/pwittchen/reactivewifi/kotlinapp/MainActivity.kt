@@ -16,19 +16,26 @@
 package com.github.pwittchen.reactivewifi.kotlinapp
 
 import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.wifi.ScanResult
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.widget.ArrayAdapter
+import com.github.pwittchen.reactivewifi.AccessRequester
 import com.github.pwittchen.reactivewifi.ReactiveWifi
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.access_points
+import kotlinx.android.synthetic.main.activity_main.wifi_signal_level
+import kotlinx.android.synthetic.main.activity_main.wifi_state_change
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import java.util.*
+import java.util.ArrayList
 
 class MainActivity : Activity() {
   private var wifiSubscription: Subscription? = null
@@ -53,10 +60,9 @@ class MainActivity : Activity() {
   override fun onResume() {
     super.onResume()
 
-
-    if (!isCoarseLocationPermissionGranted) {
+    if (!isFineOrCoarseLocationPermissionGranted()) {
       requestCoarseLocationPermission()
-    } else if (isCoarseLocationPermissionGranted || IS_PRE_M_ANDROID) {
+    } else if (isFineOrCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
       startWifiAccessPointsSubscription()
     }
 
@@ -79,6 +85,11 @@ class MainActivity : Activity() {
   }
 
   private fun startWifiAccessPointsSubscription() {
+    if (!AccessRequester.isLocationEnabled(this)) {
+      AccessRequester.requestLocationAccess(this)
+      return
+    }
+
     wifiSubscription = ReactiveWifi
         .observeWifiAccessPoints(applicationContext)
         .subscribeOn(Schedulers.io())
@@ -120,11 +131,7 @@ class MainActivity : Activity() {
   }
 
   private fun displayAccessPoints(scanResults: List<ScanResult>) {
-    val ssids = ArrayList<String>()
-
-    for (scanResult in scanResults) {
-      ssids.add(scanResult.SSID)
-    }
+    val ssids = scanResults.map { it.SSID }
 
     val itemLayoutId = android.R.layout.simple_list_item_1
     access_points.adapter = ArrayAdapter(this, itemLayoutId, ssids)
@@ -137,11 +144,10 @@ class MainActivity : Activity() {
   }
 
   private fun safelyUnsubscribe(vararg subscriptions: Subscription?) {
-    for (subscription in subscriptions) {
-      if (subscription != null && !subscription.isUnsubscribed) {
-        subscription.unsubscribe()
-      }
-    }
+    subscriptions
+        .filterNotNull()
+        .filterNot { it.isUnsubscribed }
+        .forEach { it.unsubscribe() }
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -162,7 +168,15 @@ class MainActivity : Activity() {
     }
   }
 
-  private val isCoarseLocationPermissionGranted: Boolean
-    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(
-        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+  private fun isFineOrCoarseLocationPermissionGranted(): Boolean {
+    val isAndroidMOrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    val isFineLocationPermissionGranted = isGranted(ACCESS_FINE_LOCATION)
+    val isCoarseLocationPermissionGranted = isGranted(ACCESS_COARSE_LOCATION)
+
+    return isAndroidMOrHigher && (isFineLocationPermissionGranted || isCoarseLocationPermissionGranted)
+  }
+
+  private fun isGranted(permission: String): Boolean {
+    return ActivityCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED
+  }
 }

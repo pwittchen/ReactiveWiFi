@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="requesting_location_access">Requesting location access</string>
+  <string name="do_you_want_to_open_location_settings">Do you want to open Location settings to enable location services? Without WiFi Access Points will not be detected.</string>
+</resources>

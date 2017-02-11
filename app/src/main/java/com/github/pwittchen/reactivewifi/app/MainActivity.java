@@ -15,18 +15,18 @@
  */
 package com.github.pwittchen.reactivewifi.app;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.github.pwittchen.reactivewifi.AccessRequester;
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
@@ -36,6 +36,10 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends Activity {
   public static final boolean IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
@@ -63,9 +67,9 @@ public class MainActivity extends Activity {
   @Override protected void onResume() {
     super.onResume();
 
-    if (!isCoarseLocationPermissionGranted()) {
+    if (!isFineOrCoarseLocationPermissionGranted()) {
       requestCoarseLocationPermission();
-    } else if (isCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
+    } else if (isFineOrCoarseLocationPermissionGranted() || IS_PRE_M_ANDROID) {
       startWifiAccessPointsSubscription();
     }
 
@@ -89,6 +93,21 @@ public class MainActivity extends Activity {
   }
 
   private void startWifiAccessPointsSubscription() {
+
+    boolean fineLocationPermissionNotGranted =
+        ActivityCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PERMISSION_GRANTED;
+    boolean coarseLocationPermissionNotGranted =
+        ActivityCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION) != PERMISSION_GRANTED;
+
+    if (fineLocationPermissionNotGranted && coarseLocationPermissionNotGranted) {
+      return;
+    }
+
+    if (!AccessRequester.isLocationEnabled(this)) {
+      AccessRequester.requestLocationAccess(this);
+      return;
+    }
+
     wifiSubscription = ReactiveWifi.observeWifiAccessPoints(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -162,7 +181,7 @@ public class MainActivity extends Activity {
       int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     final boolean isCoarseLocation = requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION;
-    final boolean permissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+    final boolean permissionGranted = grantResults[0] == PERMISSION_GRANTED;
 
     if (isCoarseLocation && permissionGranted && wifiSubscription == null) {
       startWifiAccessPointsSubscription();
@@ -171,14 +190,21 @@ public class MainActivity extends Activity {
 
   private void requestCoarseLocationPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      requestPermissions(new String[] { Manifest.permission.ACCESS_COARSE_LOCATION },
+      requestPermissions(new String[] { ACCESS_COARSE_LOCATION },
           PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
     }
   }
 
-  private boolean isCoarseLocationPermissionGranted() {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-        && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-        == PackageManager.PERMISSION_GRANTED;
+  private boolean isFineOrCoarseLocationPermissionGranted() {
+    boolean isAndroidMOrHigher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+    boolean isFineLocationPermissionGranted = isGranted(ACCESS_FINE_LOCATION);
+    boolean isCoarseLocationPermissionGranted = isGranted(ACCESS_COARSE_LOCATION);
+
+    return isAndroidMOrHigher && (isFineLocationPermissionGranted
+        || isCoarseLocationPermissionGranted);
+  }
+
+  private boolean isGranted(String permission) {
+    return ActivityCompat.checkSelfPermission(this, permission) == PERMISSION_GRANTED;
   }
 }
