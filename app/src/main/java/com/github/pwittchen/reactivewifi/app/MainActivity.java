@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
   private static final String WIFI_SIGNAL_LEVEL_MESSAGE = "WiFi signal level: ";
   private static final String WIFI_STATE_MESSAGE = "WiFi State: ";
   private TextView tvWifiSignalLevel;
-  private TextView tvWifiStateLevel;
+  private TextView tvWifiState;
   private ListView lvAccessPoints;
   private ReactiveWifi reactiveWifi;
   private Subscription wifiSubscription;
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
     lvAccessPoints = (ListView) findViewById(R.id.access_points);
     tvWifiSignalLevel = (TextView) findViewById(R.id.wifi_signal_level);
-    tvWifiStateLevel = (TextView) findViewById(R.id.wifi_state_change);
+    tvWifiState = (TextView) findViewById(R.id.wifi_state_change);
   }
 
   @Override protected void onResume() {
@@ -128,7 +128,7 @@ public class MainActivity extends Activity {
         .subscribe(new Action1<WifiState>() {
           @Override public void call(WifiState wifiState) {
             Log.d(TAG, "call: " + wifiState.name());
-            tvWifiStateLevel.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
+            tvWifiState.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
           }
         });
   }

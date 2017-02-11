@@ -42,7 +42,7 @@ class MainActivity : Activity() {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
     private val TAG = "ReactiveWifi"
     private val WIFI_SIGNAL_LEVEL_MESSAGE = "WiFi signal level: "
-    private val WIFI_STATE_CHNAGE_MESSAGE = "WiFi State: "
+    private val WIFI_STATE_CHANGE_MESSAGE = "WiFi State: "
     val IS_PRE_M_ANDROID = Build.VERSION.SDK_INT < Build.VERSION_CODES.M
   }
 
@@ -113,7 +113,7 @@ class MainActivity : Activity() {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { wifiState ->
           Log.d("ReactiveWifi", wifiState.description)
-          wifi_state_change.text = WIFI_STATE_CHNAGE_MESSAGE + wifiState.description
+          wifi_state_change.text = WIFI_STATE_CHANGE_MESSAGE + wifiState.description
         }
   }
 
