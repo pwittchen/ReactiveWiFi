@@ -55,6 +55,8 @@ if (!AccessRequester.isLocationEnabled(this)) {
 }
 ```
 
+If you need more customization (e.g. custom title and message of the dialog window or custom listener), check public API of the `AccessRequester` class.
+
 We can observe WiFi Access Points with `observeWifiAccessPoints(context)` method. Subscriber will be called everytime, when strength of the WiFi Access Points signal changes (it usually happens when user is moving around with a mobile device). We can do it in the following way:
 
 ```java
