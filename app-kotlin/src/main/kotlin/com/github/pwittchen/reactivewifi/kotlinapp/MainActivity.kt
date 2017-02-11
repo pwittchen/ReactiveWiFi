@@ -35,7 +35,6 @@ import kotlinx.android.synthetic.main.activity_main.wifi_state_change
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import java.util.ArrayList
 
 class MainActivity : Activity() {
   private var wifiSubscription: Subscription? = null

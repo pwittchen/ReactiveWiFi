@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-  compileSdkVersion 25
-  buildToolsVersion "25.0.1"
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
 
   defaultConfig {
     applicationId "com.github.pwittchen.reactivewifi.kotlinapp"
-    minSdkVersion 15
-    targetSdkVersion 25
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.compileSdkVersion
     versionCode 1
     versionName "1.0"
   }
@@ -33,7 +33,7 @@ android {
 dependencies {
   compile project(':library')
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  compile 'com.android.support:appcompat-v7:25.1.1'
+  compile deps.appcompatv7
 }
 
 repositories {
@@ -48,6 +48,6 @@ buildscript {
   }
 
   dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
   }
 }
