@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+v. 0.2.0
+--------
+*11 Feb 2017*
+
+- added `WifiState` enum
+- added `Observable<WifiState> observeWifiStateChange(context)` to `ReactiveWifi` class
+- updated Gradle and Travis CI config
+- updated Gradle Wrapper version
+- bumped target SDK version to 25 and build tools version to 25.0.1
+- bumped RxJava to v. 1.2.6
+- made methods, which create Observables in `ReactiveWifi` class static
+- made the constructor of ReactiveWifi class private
+- added permission annotations
+- added `AccessRequester` class responsible for checking if Location Services are enabled and redirecting the user to Location Settings
+
 v. 0.1.1
 --------
 *31 Jul 2016*
