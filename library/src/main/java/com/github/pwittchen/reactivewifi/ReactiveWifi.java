@@ -41,6 +41,9 @@ import rx.subscriptions.Subscriptions;
  */
 public class ReactiveWifi {
 
+  private ReactiveWifi() {
+  }
+
   /**
    * Observes WiFi Access Points.
    * Returns fresh list of Access Points
@@ -49,7 +52,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with list of WiFi scan results
    */
-  public Observable<List<ScanResult>> observeWifiAccessPoints(final Context context) {
+  public static Observable<List<ScanResult>> observeWifiAccessPoints(final Context context) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     wifiManager.startScan(); // without starting scan, we may never receive any scan results
 
@@ -84,7 +87,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return WifiSignalLevel as an enum
    */
-  public Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
+  public static Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
     return observeWifiSignalLevel(context, WifiSignalLevel.getMaxLevel()).map(
         new Func1<Integer, WifiSignalLevel>() {
           @Override public WifiSignalLevel call(Integer level) {
@@ -101,7 +104,8 @@ public class ReactiveWifi {
    * @param numLevels The number of levels to consider in the calculated level as Integer
    * @return RxJava Observable with WiFi signal level
    */
-  public Observable<Integer> observeWifiSignalLevel(final Context context, final int numLevels) {
+  public static Observable<Integer> observeWifiSignalLevel(final Context context,
+      final int numLevels) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
@@ -135,7 +139,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with SupplicantState
    */
-  public Observable<SupplicantState> observeSupplicantState(final Context context) {
+  public static Observable<SupplicantState> observeSupplicantState(final Context context) {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
@@ -170,7 +174,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with WifiInfo
    */
-  public Observable<WifiInfo> observeWifiAccessPointChanges(final Context context) {
+  public static Observable<WifiInfo> observeWifiAccessPointChanges(final Context context) {
     final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
@@ -206,7 +210,7 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with different state change
    */
-  public Observable<WifiState> observeWifiStateChange(final Context context) {
+  public static Observable<WifiState> observeWifiStateChange(final Context context) {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
     return Observable.create(new Observable.OnSubscribe<WifiState>() {
@@ -230,7 +234,7 @@ public class ReactiveWifi {
     });
   }
 
-  private Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
+  private static Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
     return Subscriptions.create(new Action0() {
       @Override public void call() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
