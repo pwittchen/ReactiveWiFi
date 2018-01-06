@@ -6,71 +6,72 @@ apply plugin: 'pmd'
 check.dependsOn 'checkstyle', 'findbugs', 'pmd', 'lint'
 
 checkstyle {
-    toolVersion = "6.0"
+  toolVersion = "6.0"
 }
 
 task checkstyle(type: Checkstyle) {
-    configFile file("${project.rootDir}/config/quality/checkstyle/checkstyle.xml")
-    configProperties.checkstyleSuppressionsPath = file("${project.rootDir}/config/quality/checkstyle/suppressions.xml").absolutePath
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
-    classpath = files()
+  configFile file("${project.rootDir}/config/quality/checkstyle/checkstyle.xml")
+  configProperties.checkstyleSuppressionsPath =
+          file("${project.rootDir}/config/quality/checkstyle/suppressions.xml").absolutePath
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
+  classpath = files()
 }
 
 task findbugs(type: FindBugs) {
-    ignoreFailures = false
-    effort = "max"
-    reportLevel = "high"
-    excludeFilter = new File("${project.rootDir}/config/quality/findbugs/findbugs-filter.xml")
-    classes = files("${project.rootDir}/app/build/intermediates/classes")
+  ignoreFailures = false
+  effort = "max"
+  reportLevel = "high"
+  excludeFilter = new File("${project.rootDir}/config/quality/findbugs/findbugs-filter.xml")
+  classes = files("${project.rootDir}/app/build/intermediates/classes")
 
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-        xml {
-            destination file("$project.buildDir/reports/findbugs/findbugs.xml")
-        }
-        html {
-            destination file("$project.buildDir/reports/findbugs/findbugs.html")
-        }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+    xml {
+      destination file("$project.buildDir/reports/findbugs/findbugs.xml")
     }
+    html {
+      destination file("$project.buildDir/reports/findbugs/findbugs.html")
+    }
+  }
 
-    classpath = files()
+  classpath = files()
 }
 
 task pmd(type: Pmd) {
-    ignoreFailures = false
-    ruleSetFiles = files("${project.rootDir}/config/quality/pmd/pmd-ruleset.xml")
-    ruleSets = []
+  ignoreFailures = false
+  ruleSetFiles = files("${project.rootDir}/config/quality/pmd/pmd-ruleset.xml")
+  ruleSets = []
 
-    source 'src'
-    include '**/*.java'
-    exclude '**/gen/**'
+  source 'src'
+  include '**/*.java'
+  exclude '**/gen/**'
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-        xml {
-            destination file("$project.buildDir/reports/pmd/pmd.xml")
-        }
-        html {
-            destination file("$project.buildDir/reports/pmd/pmd.html")
-        }
+  reports {
+    xml.enabled = false
+    html.enabled = true
+    xml {
+      destination file("$project.buildDir/reports/pmd/pmd.xml")
     }
+    html {
+      destination file("$project.buildDir/reports/pmd/pmd.html")
+    }
+  }
 }
 
 android {
-    lintOptions {
-        abortOnError false
-        xmlReport false
-        htmlReport true
-        lintConfig file("${project.rootDir}/config/quality/lint/lint.xml")
-        htmlOutput file("$project.buildDir/reports/lint/lint-result.html")
-        xmlOutput file("$project.buildDir/reports/lint/lint-result.xml")
-    }
+  lintOptions {
+    abortOnError false
+    xmlReport false
+    htmlReport true
+    lintConfig file("${project.rootDir}/config/quality/lint/lint.xml")
+    htmlOutput file("$project.buildDir/reports/lint/lint-result.html")
+    xmlOutput file("$project.buildDir/reports/lint/lint-result.xml")
+  }
 }
