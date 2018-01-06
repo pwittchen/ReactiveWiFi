@@ -2,11 +2,15 @@
 
 Android library listening available WiFi Access Points and related information with RxJava Observables.
 
+
+| Current Branch | Branch  | Artifact Id | Build Status  | Maven Central |
+|:--------------:|:-------:|:-----------:|:-------------:|:-------------:|
+| | [`RxJava1.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava1.x) | `reactivewifi` | [![Build Status for RxJava1.x](https://travis-ci.org/pwittchen/ReactiveWifi.svg?branch=RxJava1.x)](https://travis-ci.org/pwittchen/ReactiveWifi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat) |
+| :ballot_box_with_check: | [`RxJava2.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava2.x) | `reactivewifi-rx2` | [![Build Status for RxJava2.x](https://travis-ci.org/pwittchen/ReactiveWifi.svg?branch=RxJava2.x)](https://travis-ci.org/pwittchen/ReactiveWifi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi-rx2.svg?style=flat) |
+
 This library is one of the successors of the [NetworkEvents](https://github.com/pwittchen/NetworkEvents) library. Its functionality was extracted from [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project to make it more specialized and reduce number of required permissions required to perform specific task.
 
 If you are searching library for observing network or Internet connectivity check [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
-
-Library is compatible with RxJava 1.+ and RxAndroid 1.+ and uses them under the hood.
 
 JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/
 
@@ -64,10 +68,8 @@ ReactiveWifi.observeWifiAccessPoints(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<List<ScanResult>>() {
-      @Override public void call(List<ScanResult> scanResults) {
-        // do something with scanResults
-      }
+    .subscribe(scanResults -> {
+      // do something with ScanResults
     });
 ```
 
@@ -82,10 +84,8 @@ ReactiveWifi.observeWifiSignalLevel(context, numLevels)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<Integer>() {
-      @Override public void call(Integer level) {
-        // do something with level
-      }
+    .subscribe(level -> {
+      // do something with level
     });
 ```
 
@@ -96,10 +96,8 @@ ReactiveWifi.observeWifiSignalLevel(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiSignalLevel>() {
-      @Override public void call(WifiSignalLevel signalLevel) {
-        // do something with signalLevel
-      }
+    .subscribe(level -> {
+      // do something with level
     });
 ```
 
@@ -125,11 +123,9 @@ ReactiveWifi.observeWifiAccessPointChanges(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiInfo>() {
-      @Override public void call(WifiInfo wifiInfo) {
-        // do something with wifiInfo
-      }
-    });
+    .subscribe(wifiInfo -> {
+      // do something with wifiInfo
+    });;
 ```
 
 ### Observing WPA Supplicant state changes
@@ -141,10 +137,8 @@ ReactiveWifi.observeSupplicantState(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<SupplicantState>() {
-      @Override public void call(SuppicantState state) {
-        // do something with state
-      }
+    .subscribe(state -> {
+      // do something with state
     });
 ```
 
@@ -157,10 +151,8 @@ ReactiveWifi.observeWifiStateChange(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiState>() {
-      @Override public void call(WifiState wifiState) {
-        // do something with state
-      }
+    .subscribe(state -> {
+      // do something with level
     });
 ```
 Examples
@@ -173,21 +165,7 @@ If you want to use this library with Kotlin, check `app-kotlin` directory.
 Download
 --------
 
-```xml
-<dependency>
-    <groupId>com.github.pwittchen</groupId>
-    <artifactId>reactivewifi</artifactId>
-    <version>0.2.0</version>
-</dependency>
-```
-
-or through Gradle:
-
-```groovy
-dependencies {
-  compile 'com.github.pwittchen:reactivewifi:0.2.0'
-}
-```
+TBD.
 
 Code style
 ----------
