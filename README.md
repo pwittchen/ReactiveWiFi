@@ -5,8 +5,8 @@ Android library listening available WiFi Access Points and related information w
 
 | Current Branch | Branch  | Artifact Id | Build Status  | Maven Central |
 |:--------------:|:-------:|:-----------:|:-------------:|:-------------:|
-| | [`RxJava1.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava1.x) | `reactivewifi` | [![Build Status for RxJava1.x](https://travis-ci.org/pwittchen/ReactiveWifi.svg?branch=RxJava1.x)](https://travis-ci.org/pwittchen/ReactiveWifi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat) |
-| :ballot_box_with_check: | [`RxJava2.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava2.x) | `reactivewifi-rx2` | [![Build Status for RxJava2.x](https://travis-ci.org/pwittchen/ReactiveWifi.svg?branch=RxJava2.x)](https://travis-ci.org/pwittchen/ReactiveWifi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi-rx2.svg?style=flat) |
+| | [`RxJava1.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava1.x) | `reactivewifi` | [![Build Status for RxJava1.x](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=RxJava1.x)](https://travis-ci.org/pwittchen/ReactiveWiFi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat) |
+| :ballot_box_with_check: | [`RxJava2.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava2.x) | `reactivewifi-rx2` | [![Build Status for RxJava2.x](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=RxJava2.x)](https://travis-ci.org/pwittchen/ReactiveWiFi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi-rx2.svg?style=flat) |
 
 This library is one of the successors of the [NetworkEvents](https://github.com/pwittchen/NetworkEvents) library. Its functionality was extracted from [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project to make it more specialized and reduce number of required permissions required to perform specific task.
 
