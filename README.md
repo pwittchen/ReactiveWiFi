@@ -15,7 +15,7 @@ If you are searching library for observing network or Internet connectivity chec
 
 Library is compatible with RxJava 1.+ and RxAndroid 1.+ and uses them under the hood.
 
-JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/
+JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/RxJava1.x
 
 Contents
 --------
