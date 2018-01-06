@@ -2,7 +2,6 @@
 
 Android library listening available WiFi Access Points and related information with RxJava Observables.
 
-
 | Current Branch | Branch  | Artifact Id | Build Status  | Maven Central |
 |:--------------:|:-------:|:-----------:|:-------------:|:-------------:|
 | | [`RxJava1.x`](https://github.com/pwittchen/ReactiveWifi/tree/RxJava1.x) | `reactivewifi` | [![Build Status for RxJava1.x](https://travis-ci.org/pwittchen/ReactiveWiFi.svg?branch=RxJava1.x)](https://travis-ci.org/pwittchen/ReactiveWiFi) | ![Maven Central](https://img.shields.io/maven-central/v/com.github.pwittchen/reactivewifi.svg?style=flat) |
