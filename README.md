@@ -11,7 +11,7 @@ This library is one of the successors of the [NetworkEvents](https://github.com/
 
 If you are searching library for observing network or Internet connectivity check [ReactiveNetwork](https://github.com/pwittchen/ReactiveNetwork) project.
 
-JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/
+JavaDoc is available at: http://pwittchen.github.io/ReactiveWiFi/RxJava2.x
 
 Contents
 --------
