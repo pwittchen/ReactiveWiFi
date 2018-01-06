@@ -32,9 +32,9 @@ buildscript {
 
 allprojects {
   repositories {
-      mavenCentral()
-      jcenter()
-      google()
+    mavenCentral()
+    jcenter()
+    google()
   }
 }
 
