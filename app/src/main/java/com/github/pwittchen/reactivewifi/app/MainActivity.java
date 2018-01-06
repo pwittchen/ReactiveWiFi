@@ -17,8 +17,6 @@ package com.github.pwittchen.reactivewifi.app;
 
 import android.app.Activity;
 import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -28,13 +26,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.github.pwittchen.reactivewifi.AccessRequester;
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
-import com.github.pwittchen.reactivewifi.WifiSignalLevel;
-import com.github.pwittchen.reactivewifi.WifiState;
 import java.util.ArrayList;
 import java.util.List;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -83,12 +78,10 @@ public class MainActivity extends Activity {
     signalLevelSubscription = ReactiveWifi.observeWifiSignalLevel(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiSignalLevel>() {
-          @Override public void call(final WifiSignalLevel level) {
-            Log.d(TAG, level.toString());
-            final String description = level.description;
-            tvWifiSignalLevel.setText(WIFI_SIGNAL_LEVEL_MESSAGE.concat(description));
-          }
+        .subscribe(level -> {
+          Log.d(TAG, level.toString());
+          final String description = level.description;
+          tvWifiSignalLevel.setText(WIFI_SIGNAL_LEVEL_MESSAGE.concat(description));
         });
   }
 
@@ -111,44 +104,31 @@ public class MainActivity extends Activity {
     wifiSubscription = ReactiveWifi.observeWifiAccessPoints(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<List<ScanResult>>() {
-          @Override public void call(final List<ScanResult> scanResults) {
-            displayAccessPoints(scanResults);
-          }
-        });
+        .subscribe(this::displayAccessPoints);
   }
 
   private void startSupplicantSubscription() {
     supplicantSubscription = ReactiveWifi.observeSupplicantState(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<SupplicantState>() {
-          @Override public void call(SupplicantState supplicantState) {
-            Log.d("ReactiveWifi", "New supplicant state: " + supplicantState.toString());
-          }
-        });
+        .subscribe(supplicantState -> Log.d("ReactiveWifi",
+            "New supplicant state: " + supplicantState.toString()));
   }
 
   private void startWifiInfoSubscription() {
     wifiInfoSubscription = ReactiveWifi.observeWifiAccessPointChanges(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiInfo>() {
-          @Override public void call(WifiInfo wifiInfo) {
-            Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.getBSSID());
-          }
-        });
+        .subscribe(wifiInfo -> Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.getBSSID()));
   }
 
   private void startWifiStateSubscription() {
     wifiStateSubscription = ReactiveWifi.observeWifiStateChange(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiState>() {
-          @Override public void call(WifiState wifiState) {
-            Log.d(TAG, "call: " + wifiState.name());
-            tvWifiState.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
-          }
+        .subscribe(wifiState -> {
+          Log.d(TAG, "call: " + wifiState.name());
+          tvWifiState.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
         });
   }
 
@@ -190,7 +170,7 @@ public class MainActivity extends Activity {
 
   private void requestCoarseLocationPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      requestPermissions(new String[] { ACCESS_COARSE_LOCATION },
+      requestPermissions(new String[] {ACCESS_COARSE_LOCATION},
           PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION);
     }
   }
