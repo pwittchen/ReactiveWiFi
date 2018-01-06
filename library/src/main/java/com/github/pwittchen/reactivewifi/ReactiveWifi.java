@@ -90,7 +90,8 @@ public class ReactiveWifi {
           context.registerReceiver(receiver, filter);
         } else {
           emitter.onError(new RuntimeException(
-              "WifiManager was null, so BroadcastReceiver for Wifi scan results cannot be registered"));
+              "WifiManager was null, so BroadcastReceiver for Wifi scan results "
+                  + "cannot be registered"));
         }
 
         Disposable disposable = disposeInUiThread(new Action() {
@@ -154,7 +155,8 @@ public class ReactiveWifi {
           context.registerReceiver(receiver, filter);
         } else {
           emitter.onError(new RuntimeException(
-              "WifiManager is null, so BroadcastReceiver for Wifi signal level cannot be registered"));
+              "WifiManager is null, so BroadcastReceiver for Wifi signal level "
+                  + "cannot be registered"));
         }
 
         Disposable disposable = disposeInUiThread(new Action() {
