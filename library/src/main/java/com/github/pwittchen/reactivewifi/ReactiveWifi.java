@@ -15,6 +15,7 @@
  */
 package com.github.pwittchen.reactivewifi;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,16 +25,19 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresPermission;
+import android.util.Log;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.Disposables;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Function;
 import java.util.List;
-import rx.Observable;
-import rx.Scheduler;
-import rx.Subscriber;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Func1;
-import rx.subscriptions.Subscriptions;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -47,6 +51,8 @@ import static android.Manifest.permission.CHANGE_WIFI_STATE;
  */
 public class ReactiveWifi {
 
+  private final static String LOG_TAG = "ReactiveWifi";
+
   private ReactiveWifi() {
   }
 
@@ -58,34 +64,54 @@ public class ReactiveWifi {
    * @param context Context of the activity or an application
    * @return RxJava Observable with list of WiFi scan results
    */
-  @RequiresPermission(allOf = {
+  @SuppressLint("MissingPermission") @RequiresPermission(allOf = {
       ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE
   }) public static Observable<List<ScanResult>> observeWifiAccessPoints(final Context context) {
-    final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-    wifiManager.startScan(); // without starting scan, we may never receive any scan results
+    @SuppressLint("WifiManagerPotentialLeak") final WifiManager wifiManager =
+        (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
+    if (wifiManager != null) {
+      wifiManager.startScan(); // without starting scan, we may never receive any scan results
+    } else {
+      Log.w(LOG_TAG, "WifiManager was null, so WiFi scan was not started");
+    }
 
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
     filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<List<ScanResult>>() {
-      @Override public void call(final Subscriber<? super List<ScanResult>> subscriber) {
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
-            wifiManager.startScan(); // we need to start scan again to get fresh results ASAP
-            subscriber.onNext(wifiManager.getScanResults());
-          }
-        };
+    return Observable.create(new ObservableOnSubscribe<List<ScanResult>>() {
 
-        context.registerReceiver(receiver, filter);
+      @Override public void subscribe(final ObservableEmitter<List<ScanResult>> emitter)
+          throws Exception {
+        final BroadcastReceiver receiver = createWifiScanResultsReceiver(emitter, wifiManager);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
-            context.unregisterReceiver(receiver);
+        if (wifiManager != null) {
+          context.registerReceiver(receiver, filter);
+        } else {
+          emitter.onError(new RuntimeException(
+              "WifiManager was null, so BroadcastReceiver for Wifi scan results cannot be registered"));
+        }
+
+        Disposable disposable = disposeInUiThread(new Action() {
+          @Override public void run() {
+            tryToUnregisterReceiver(context, receiver);
           }
-        }));
+        });
+
+        emitter.setDisposable(disposable);
       }
     });
+  }
+
+  @NonNull protected static BroadcastReceiver createWifiScanResultsReceiver(
+      final ObservableEmitter<List<ScanResult>> emitter, final WifiManager wifiManager) {
+    return new BroadcastReceiver() {
+      @Override public void onReceive(Context context1, Intent intent) {
+        wifiManager.startScan(); // we need to start scan again to get fresh results ASAP
+        emitter.onNext(wifiManager.getScanResults());
+      }
+    };
   }
 
   /**
@@ -98,8 +124,8 @@ public class ReactiveWifi {
   @RequiresPermission(ACCESS_WIFI_STATE)
   public static Observable<WifiSignalLevel> observeWifiSignalLevel(final Context context) {
     return observeWifiSignalLevel(context, WifiSignalLevel.getMaxLevel()).map(
-        new Func1<Integer, WifiSignalLevel>() {
-          @Override public WifiSignalLevel call(Integer level) {
+        new Function<Integer, WifiSignalLevel>() {
+          @Override public WifiSignalLevel apply(Integer level) throws Exception {
             return WifiSignalLevel.fromLevel(level);
           }
         });
@@ -119,25 +145,39 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<Integer>() {
-      @Override public void call(final Subscriber<? super Integer> subscriber) {
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
-            final int rssi = wifiManager.getConnectionInfo().getRssi();
-            final int level = WifiManager.calculateSignalLevel(rssi, numLevels);
-            subscriber.onNext(level);
-          }
-        };
+    return Observable.create(new ObservableOnSubscribe<Integer>() {
+      @Override public void subscribe(final ObservableEmitter<Integer> emitter) throws Exception {
+        final BroadcastReceiver receiver =
+            createSignalLevelReceiver(emitter, wifiManager, numLevels);
 
-        context.registerReceiver(receiver, filter);
+        if (wifiManager != null) {
+          context.registerReceiver(receiver, filter);
+        } else {
+          emitter.onError(new RuntimeException(
+              "WifiManager is null, so BroadcastReceiver for Wifi signal level cannot be registered"));
+        }
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
-            context.unregisterReceiver(receiver);
+        Disposable disposable = disposeInUiThread(new Action() {
+          @Override public void run() {
+            tryToUnregisterReceiver(context, receiver);
           }
-        }));
+        });
+
+        emitter.setDisposable(disposable);
       }
     }).defaultIfEmpty(0);
+  }
+
+  @NonNull protected static BroadcastReceiver createSignalLevelReceiver(
+      final ObservableEmitter<Integer> emitter,
+      final WifiManager wifiManager, final int numLevels) {
+    return new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        final int rssi = wifiManager.getConnectionInfo().getRssi();
+        final int level = WifiManager.calculateSignalLevel(rssi, numLevels);
+        emitter.onNext(level);
+      }
+    };
   }
 
   /**
@@ -153,28 +193,36 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<SupplicantState>() {
-      @Override public void call(final Subscriber<? super SupplicantState> subscriber) {
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
-            SupplicantState supplicantState =
-                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-
-            if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
-              subscriber.onNext(supplicantState);
-            }
-          }
-        };
+    return Observable.create(new ObservableOnSubscribe<SupplicantState>() {
+      @Override public void subscribe(final ObservableEmitter<SupplicantState> emitter)
+          throws Exception {
+        final BroadcastReceiver receiver = createSupplicantStateReceiver(emitter);
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
-            context.unregisterReceiver(receiver);
+        Disposable disposable = disposeInUiThread(new Action() {
+          @Override public void run() {
+            tryToUnregisterReceiver(context, receiver);
           }
-        }));
+        });
+
+        emitter.setDisposable(disposable);
       }
     }).defaultIfEmpty(SupplicantState.UNINITIALIZED);
+  }
+
+  @NonNull protected static BroadcastReceiver createSupplicantStateReceiver(
+      final ObservableEmitter<SupplicantState> emitter) {
+    return new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        SupplicantState supplicantState =
+            intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+
+        if ((supplicantState != null) && SupplicantState.isValidState(supplicantState)) {
+          emitter.onNext(supplicantState);
+        }
+      }
+    };
   }
 
   /**
@@ -190,27 +238,35 @@ public class ReactiveWifi {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
-    return Observable.create(new Observable.OnSubscribe<WifiInfo>() {
-      @Override public void call(final Subscriber<? super WifiInfo> subscriber) {
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
-            SupplicantState supplicantState =
-                intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-            if (supplicantState == SupplicantState.COMPLETED) {
-              subscriber.onNext(wifiManager.getConnectionInfo());
-            }
-          }
-        };
+    return Observable.create(new ObservableOnSubscribe<WifiInfo>() {
+      @Override public void subscribe(final ObservableEmitter<WifiInfo> emitter) throws Exception {
+        final BroadcastReceiver receiver =
+            createAccessPointChangesReceiver(emitter, wifiManager);
 
         context.registerReceiver(receiver, filter);
 
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
-            context.unregisterReceiver(receiver);
+        Disposable disposable = disposeInUiThread(new Action() {
+          @Override public void run() {
+            tryToUnregisterReceiver(context, receiver);
           }
-        }));
+        });
+
+        emitter.setDisposable(disposable);
       }
     });
+  }
+
+  @NonNull protected static BroadcastReceiver createAccessPointChangesReceiver(
+      final ObservableEmitter<WifiInfo> emitter, final WifiManager wifiManager) {
+    return new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        SupplicantState supplicantState =
+            intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+        if (supplicantState == SupplicantState.COMPLETED) {
+          emitter.onNext(wifiManager.getConnectionInfo());
+        }
+      }
+    };
   }
 
   /**
@@ -225,38 +281,62 @@ public class ReactiveWifi {
       final Context context) {
     final IntentFilter filter = new IntentFilter();
     filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-    return Observable.create(new Observable.OnSubscribe<WifiState>() {
-      @Override public void call(final Subscriber<? super WifiState> subscriber) {
 
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-          @Override public void onReceive(Context context, Intent intent) {
-            //we receive whenever the wifi state is change
-            int wifiState =
-                intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
-            subscriber.onNext(WifiState.fromState(wifiState));
-          }
-        };
+    return Observable.create(new ObservableOnSubscribe<WifiState>() {
+      @Override public void subscribe(final ObservableEmitter<WifiState> emitter) throws Exception {
+        final BroadcastReceiver receiver = createWifiStateChangeReceiver(emitter);
         context.registerReceiver(receiver, filter);
-        subscriber.add(unsubscribeInUiThread(new Action0() {
-          @Override public void call() {
-            context.unregisterReceiver(receiver);
+        Disposable disposable = disposeInUiThread(new Action() {
+          @Override public void run() {
+            tryToUnregisterReceiver(context, receiver);
           }
-        }));
+        });
+
+        emitter.setDisposable(disposable);
       }
     });
   }
 
-  private static Subscription unsubscribeInUiThread(final Action0 unsubscribe) {
-    return Subscriptions.create(new Action0() {
-      @Override public void call() {
+  @NonNull protected static BroadcastReceiver createWifiStateChangeReceiver(
+      final ObservableEmitter<WifiState> emitter) {
+    return new BroadcastReceiver() {
+      @Override public void onReceive(Context context, Intent intent) {
+        //we receive whenever the wifi state is change
+        int wifiState =
+            intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+        emitter.onNext(WifiState.fromState(wifiState));
+      }
+    };
+  }
+
+  protected static void tryToUnregisterReceiver(final Context context,
+      final BroadcastReceiver receiver) {
+    try {
+      context.unregisterReceiver(receiver);
+    } catch (Exception exception) {
+      onError("receiver was already unregistered", exception);
+    }
+  }
+
+  protected static void onError(final String message, final Exception exception) {
+    Log.e(LOG_TAG, message, exception);
+  }
+
+  private static Disposable disposeInUiThread(final Action action) {
+    return Disposables.fromAction(new Action() {
+      @Override public void run() throws Exception {
         if (Looper.getMainLooper() == Looper.myLooper()) {
-          unsubscribe.call();
+          action.run();
         } else {
           final Scheduler.Worker inner = AndroidSchedulers.mainThread().createWorker();
-          inner.schedule(new Action0() {
-            @Override public void call() {
-              unsubscribe.call();
-              inner.unsubscribe();
+          inner.schedule(new Runnable() {
+            @Override public void run() {
+              try {
+                action.run();
+              } catch (Exception e) {
+                onError("Could not unregister receiver in UI Thread", e);
+              }
+              inner.dispose();
             }
           });
         }

@@ -27,7 +27,7 @@ android {
 }
 
 dependencies {
-  compile deps.rxjava
-  compile deps.rxandroid
-  compile deps.supportannotations
+  api deps.rxjava2
+  api deps.rxandroid2
+  implementation deps.supportannotations
 }

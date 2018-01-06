@@ -18,6 +18,7 @@ package com.github.pwittchen.reactivewifi.kotlinapp
 import android.Manifest
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -29,19 +30,18 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import com.github.pwittchen.reactivewifi.AccessRequester
 import com.github.pwittchen.reactivewifi.ReactiveWifi
-import kotlinx.android.synthetic.main.activity_main.access_points
-import kotlinx.android.synthetic.main.activity_main.wifi_signal_level
-import kotlinx.android.synthetic.main.activity_main.wifi_state_change
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : Activity() {
-  private var wifiSubscription: Subscription? = null
-  private var signalLevelSubscription: Subscription? = null
-  private var supplicantSubscription: Subscription? = null
-  private var wifiInfoSubscription: Subscription? = null
-  private var wifiStateSubscription: Subscription? = null
+  private var wifiSubscription: Disposable? = null
+  private var signalLevelSubscription: Disposable? = null
+  private var supplicantSubscription: Disposable? = null
+  private var wifiInfoSubscription: Disposable? = null
+  private var wifiStateSubscription: Disposable? = null
 
   companion object {
     private val PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION = 1000
@@ -83,6 +83,7 @@ class MainActivity : Activity() {
         }
   }
 
+  @SuppressLint("MissingPermission")
   private fun startWifiAccessPointsSubscription() {
     if (!AccessRequester.isLocationEnabled(this)) {
       AccessRequester.requestLocationAccess(this)
@@ -142,15 +143,15 @@ class MainActivity : Activity() {
         wifiInfoSubscription)
   }
 
-  private fun safelyUnsubscribe(vararg subscriptions: Subscription?) {
+  private fun safelyUnsubscribe(vararg subscriptions: Disposable?) {
     subscriptions
         .filterNotNull()
-        .filterNot { it.isUnsubscribed }
-        .forEach { it.unsubscribe() }
+        .filterNot { it.isDisposed }
+        .forEach { it.dispose() }
   }
 
   override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
-      grantResults: IntArray) {
+                                          grantResults: IntArray) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     val isCoarseLocation = requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION
     val permissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED

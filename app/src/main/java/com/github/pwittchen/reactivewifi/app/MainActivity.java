@@ -21,6 +21,7 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -30,12 +31,12 @@ import com.github.pwittchen.reactivewifi.AccessRequester;
 import com.github.pwittchen.reactivewifi.ReactiveWifi;
 import com.github.pwittchen.reactivewifi.WifiSignalLevel;
 import com.github.pwittchen.reactivewifi.WifiState;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -50,11 +51,11 @@ public class MainActivity extends Activity {
   private TextView tvWifiSignalLevel;
   private TextView tvWifiState;
   private ListView lvAccessPoints;
-  private Subscription wifiSubscription;
-  private Subscription signalLevelSubscription;
-  private Subscription supplicantSubscription;
-  private Subscription wifiStateSubscription;
-  private Subscription wifiInfoSubscription;
+  private Disposable wifiSubscription;
+  private Disposable signalLevelSubscription;
+  private Disposable supplicantSubscription;
+  private Disposable wifiStateSubscription;
+  private Disposable wifiInfoSubscription;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -83,8 +84,8 @@ public class MainActivity extends Activity {
     signalLevelSubscription = ReactiveWifi.observeWifiSignalLevel(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiSignalLevel>() {
-          @Override public void call(final WifiSignalLevel level) {
+        .subscribe(new Consumer<WifiSignalLevel>() {
+          @Override public void accept(WifiSignalLevel level) throws Exception {
             Log.d(TAG, level.toString());
             final String description = level.description;
             tvWifiSignalLevel.setText(WIFI_SIGNAL_LEVEL_MESSAGE.concat(description));
@@ -111,8 +112,8 @@ public class MainActivity extends Activity {
     wifiSubscription = ReactiveWifi.observeWifiAccessPoints(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<List<ScanResult>>() {
-          @Override public void call(final List<ScanResult> scanResults) {
+        .subscribe(new Consumer<List<ScanResult>>() {
+          @Override public void accept(List<ScanResult> scanResults) throws Exception {
             displayAccessPoints(scanResults);
           }
         });
@@ -122,8 +123,8 @@ public class MainActivity extends Activity {
     supplicantSubscription = ReactiveWifi.observeSupplicantState(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<SupplicantState>() {
-          @Override public void call(SupplicantState supplicantState) {
+        .subscribe(new Consumer<SupplicantState>() {
+          @Override public void accept(SupplicantState supplicantState) throws Exception {
             Log.d("ReactiveWifi", "New supplicant state: " + supplicantState.toString());
           }
         });
@@ -133,8 +134,8 @@ public class MainActivity extends Activity {
     wifiInfoSubscription = ReactiveWifi.observeWifiAccessPointChanges(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiInfo>() {
-          @Override public void call(WifiInfo wifiInfo) {
+        .subscribe(new Consumer<WifiInfo>() {
+          @Override public void accept(WifiInfo wifiInfo) throws Exception {
             Log.d("ReactiveWifi", "New BSSID: " + wifiInfo.getBSSID());
           }
         });
@@ -144,8 +145,8 @@ public class MainActivity extends Activity {
     wifiStateSubscription = ReactiveWifi.observeWifiStateChange(getApplicationContext())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Action1<WifiState>() {
-          @Override public void call(WifiState wifiState) {
+        .subscribe(new Consumer<WifiState>() {
+          @Override public void accept(WifiState wifiState) throws Exception {
             Log.d(TAG, "call: " + wifiState.name());
             tvWifiState.setText(WIFI_STATE_MESSAGE.concat(wifiState.description));
           }
@@ -169,16 +170,16 @@ public class MainActivity extends Activity {
         wifiInfoSubscription, wifiStateSubscription);
   }
 
-  private void safelyUnsubscribe(Subscription... subscriptions) {
-    for (Subscription subscription : subscriptions) {
-      if (subscription != null && !subscription.isUnsubscribed()) {
-        subscription.unsubscribe();
+  private void safelyUnsubscribe(Disposable... subscriptions) {
+    for (Disposable subscription : subscriptions) {
+      if (subscription != null && !subscription.isDisposed()) {
+        subscription.dispose();
       }
     }
   }
 
-  @Override public void onRequestPermissionsResult(int requestCode, String[] permissions,
-      int[] grantResults) {
+  @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     final boolean isCoarseLocation = requestCode == PERMISSIONS_REQUEST_CODE_ACCESS_COARSE_LOCATION;
     final boolean permissionGranted = grantResults[0] == PERMISSION_GRANTED;
