@@ -71,10 +71,8 @@ ReactiveWifi.observeWifiAccessPoints(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<List<ScanResult>>() {
-      @Override public void call(List<ScanResult> scanResults) {
-        // do something with scanResults
-      }
+    .subscribe(scanResults -> {
+      // do something with scanResults
     });
 ```
 
@@ -103,10 +101,8 @@ ReactiveWifi.observeWifiSignalLevel(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiSignalLevel>() {
-      @Override public void call(WifiSignalLevel signalLevel) {
-        // do something with signalLevel
-      }
+    .subscribe(signalLevel -> {
+      // do something with signalLevel
     });
 ```
 
@@ -132,10 +128,8 @@ ReactiveWifi.observeWifiAccessPointChanges(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiInfo>() {
-      @Override public void call(WifiInfo wifiInfo) {
-        // do something with wifiInfo
-      }
+    .subscribe(wifiInfo -> {
+      // do something with wifiInfo
     });
 ```
 
@@ -148,10 +142,8 @@ ReactiveWifi.observeSupplicantState(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<SupplicantState>() {
-      @Override public void call(SuppicantState state) {
-        // do something with state
-      }
+    .subscribe(state -> {
+      // do something with state
     });
 ```
 
@@ -164,10 +156,8 @@ ReactiveWifi.observeWifiStateChange(context)
     .subscribeOn(Schedulers.io())
     ... // anything else what you can do with RxJava
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(new Action1<WifiState>() {
-      @Override public void call(WifiState wifiState) {
-        // do something with state
-      }
+    .subscribe(state -> {
+      // do something with state
     });
 ```
 Examples
