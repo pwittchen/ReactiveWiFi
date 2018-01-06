@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+v. 0.3.0
+--------
+*06 Jan 2018*
+
+- fixed bug: `Error receiving broadcast Intent...` #28 
+- migrated library to RxJava2.x as a separate artifact
+- bumped Gradle to v. 3.0
+- updated project dependencies
+- added Retrolambda to sample java app
+
 v. 0.2.0
 --------
 *11 Feb 2017*
