@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply from: '../config/quality.gradle'
+apply from: '../maven_push.gradle'
 
 android {
   compileSdkVersion rootProject.ext.compileSdkVersion
@@ -11,6 +12,7 @@ android {
     versionCode 1
     versionName "1.0"
   }
+
   buildTypes {
     release {
       minifyEnabled false
@@ -29,9 +31,3 @@ dependencies {
   compile deps.rxandroid
   compile deps.supportannotations
 }
-
-task wrapper(type: Wrapper) {
-  gradleVersion = '2.2.1'
-}
-
-apply from: '../maven_push.gradle'

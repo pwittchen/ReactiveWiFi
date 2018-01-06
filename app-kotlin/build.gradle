@@ -31,23 +31,19 @@ android {
 }
 
 dependencies {
-  compile project(':library')
-  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  compile deps.appcompatv7
-}
-
-repositories {
-  mavenCentral()
+  implementation project(':library')
+  implementation deps.kotlinstdlib
+  implementation deps.appcompatv7
 }
 
 buildscript {
-  ext.kotlin_version = '1.0.6'
-
   repositories {
     mavenCentral()
+    jcenter()
+    google()
   }
 
   dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_version}"
+    classpath deps.kotlingradleplugin
   }
 }
