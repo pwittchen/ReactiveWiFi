@@ -176,7 +176,7 @@ or through Gradle:
 
 ```groovy
 dependencies {
-  compile 'com.github.pwittchen:reactivewifi-rx2:0.3.0'
+  implementation 'com.github.pwittchen:reactivewifi-rx2:0.3.0'
 }
 ```
 
