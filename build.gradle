@@ -11,7 +11,7 @@ ext {
 ext.deps = [rxjava2           : 'io.reactivex.rxjava2:rxjava:2.2.12',
             rxandroid2        : 'io.reactivex.rxjava2:rxandroid:2.1.1',
             supportannotations: 'com.android.support:support-annotations:28.0.0',
-            appcompatv7       : 'com.android.support:appcompat-v7:27.0.2',
+            appcompatv7       : 'com.android.support:appcompat-v7:28.0.0',
             kotlinstdlib      : "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
             kotlingradleplugin: "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"]
 
