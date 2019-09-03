@@ -28,6 +28,7 @@ import android.provider.Settings;
  * AccessRequester is responsible for creating dialog for opening Location Settings, what allows
  * user to enable Location Services on the device
  */
+@SuppressWarnings("PMD")
 public class AccessRequester {
   private AccessRequester() {
   }

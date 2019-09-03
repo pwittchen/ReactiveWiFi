@@ -11,8 +11,7 @@ checkstyle {
 
 task checkstyle(type: Checkstyle) {
   configFile file("${project.rootDir}/config/quality/checkstyle/checkstyle.xml")
-  configProperties.checkstyleSuppressionsPath =
-          file("${project.rootDir}/config/quality/checkstyle/suppressions.xml").absolutePath
+  configProperties.checkstyleSuppressionsPath = file("${project.rootDir}/config/quality/checkstyle/suppressions.xml").absolutePath
   source 'src'
   include '**/*.java'
   exclude '**/gen/**'
@@ -24,7 +23,7 @@ task findbugs(type: FindBugs) {
   effort = "max"
   reportLevel = "high"
   excludeFilter = new File("${project.rootDir}/config/quality/findbugs/findbugs-filter.xml")
-  classes = files("${project.rootDir}/app/build/intermediates/classes")
+  classes = files("${project.rootDir}/app/build/intermediates/javac")
 
   source 'src'
   include '**/*.java'
