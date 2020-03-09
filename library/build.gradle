@@ -7,6 +7,7 @@ android {
   buildToolsVersion rootProject.ext.buildToolsVersion
 
   defaultConfig {
+    multiDexEnabled true
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.compileSdkVersion
     versionCode 1
@@ -18,16 +19,24 @@ android {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
+    debug {
+      minifyEnabled false
+    }
   }
 
   packagingOptions {
     exclude 'LICENSE.txt'
     exclude 'META-INF/LICENSE.txt'
   }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 }
 
 dependencies {
   api deps.rxjava2
   api deps.rxandroid2
-  implementation deps.supportannotations
+  implementation deps.annotations
 }

@@ -25,9 +25,9 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.net.wifi.ScanResult
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.util.Log
 import android.widget.ArrayAdapter
+import androidx.core.app.ActivityCompat
 import com.github.pwittchen.reactivewifi.AccessRequester
 import com.github.pwittchen.reactivewifi.ReactiveWifi
 import io.reactivex.android.schedulers.AndroidSchedulers
